@@ -4,6 +4,10 @@ import shutil
 import random
 from tqdm import tqdm
 import pickle
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+sns.set_style("whitegrid")
 
 def load_config(config_path):
     """ Load configuration from a YAML file
@@ -87,3 +91,17 @@ def load_data_loader(pickle_path):
     with open(pickle_path, 'rb') as file:
         data_loader = pickle.load(file)
     return data_loader
+
+def plot_metrics(train_values, test_values, metric_name):
+    plt.figure(figsize=(8, 6))
+    epochs = range(1, len(train_values) + 1)
+
+    sns.lineplot(x=epochs, y=train_values, label=f"Train {metric_name}")
+    sns.lineplot(x=epochs, y=test_values, label=f"Test {metric_name}")
+
+    plt.xlabel("Epochs")
+    plt.ylabel(metric_name)
+    plt.title(f"{metric_name}")
+    plt.legend()
+    plt.savefig(f"plots/{metric_name.lower()}_plot.png")
+    plt.show()
