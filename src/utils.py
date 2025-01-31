@@ -3,6 +3,7 @@ import os
 import shutil
 import random
 from tqdm import tqdm
+import pickle
 
 def load_config(config_path):
     """ Load configuration from a YAML file
@@ -73,3 +74,16 @@ def split_data(input_dir, output_dir, train_ratio):
             shutil.copy(os.path.join(class_path, img), os.path.join(test_class_dir, img))
 
     print("Data split completed successfully!")
+
+def load_data_loader(pickle_path):
+    """ Load data loader from a pickle file
+
+    Args:
+        pickle_path (str): Path to the pickle file
+
+    Returns:
+        object: Data loader object
+    """
+    with open(pickle_path, 'rb') as file:
+        data_loader = pickle.load(file)
+    return data_loader
