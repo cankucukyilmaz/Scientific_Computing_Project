@@ -6,7 +6,7 @@ train_dir: "split_data/train"
 test_dir: "split_data/test"
 
 # Transformer
-random_rotation_degrees: 30
+random_rotation_degrees: 40
 random_affine_degrees: 20
 random_translation: [0.1, 0.1]
 brightness: 0.1
@@ -17,7 +17,8 @@ loader_dir: "loaders"
 batch_size: 32
 
 # Training
+classes: ["bike", "bottle", "chair", "cup", "fork", "knife", "plant", "shoe", "spoon", "t-shirt"]
 train_loader_dir: "loaders/train_loader.pkl"
 test_loader_dir: "loaders/test_loader.pkl"
-epochs: 10
+epochs: 5
 learning_rate: 0.001
