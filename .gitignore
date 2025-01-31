@@ -1,0 +1,7 @@
+venv/
+input/
+split_data/
+loaders/
+
+__pycache__/
+.DS_Store
