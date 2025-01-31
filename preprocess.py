@@ -1,6 +1,9 @@
 from src.utils import *
 from src.transform import *
 
+import warnings
+warnings.filterwarnings("ignore")
+
 config = load_config("config.yaml")
 
 def preprocess():
@@ -12,7 +15,7 @@ def preprocess():
         config["random_rotation_degrees"],
         config["random_affine_degrees"],
         config["random_translation"],
-        config["brigthness"],
+        config["brightness"],
         config["contrast"],
         config["saturation"],
         config["hue"]
