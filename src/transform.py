@@ -1,5 +1,6 @@
 import numpy as np
 import os
+import json
 from tqdm import tqdm
 from PIL import Image
 from torchvision.transforms import v2
@@ -8,48 +9,66 @@ from torchvision.datasets import ImageFolder
 from torch.utils.data import DataLoader
 import pickle
 
-def compute_mean_std(input_dir):
-    """Compute the mean and standard deviation of the input images.
+def compute_mean_std(input_dir, save_path="mean_std.json", for_training=True, force_recompute=False):
+    """Compute and save/load the mean and standard deviation of input images.
 
     Args:
         input_dir (str): The directory containing the input images.
+        save_path (str): Path to save or load the mean and std.
+        for_training (bool): If True, uses the function for training (e.g., saving/loading mean/std for training).
+        force_recompute (bool): If True, forces recomputation instead of loading existing values.
 
     Returns:
         tuple: The mean and standard deviation of the input images.
     """
+    if not for_training:
+        save_path = save_path.replace(".json", "_test.json")  # Use different file for non-training mode
+
+    # If the file exists and recomputation is not forced, load existing values
+    if os.path.exists(save_path) and not force_recompute:
+        with open(save_path, "r") as f:
+            data = json.load(f)
+        mean, std = np.array(data["mean"]), np.array(data["std"])
+        print(f"Loaded saved mean and std from {'training' if for_training else 'testing'} data: {mean}, {std}")
+        return mean, std
+
+    print(f"Computing mean and std for {'training' if for_training else 'testing'} data...")
+
     # Initialize variables
     pixel_sum = np.zeros(3)
     pixel_squared_sum = np.zeros(3)
     num_pixels = 0
 
-    # Collect all image paths for the progress bar
-    image_paths = []
-    for subfolder in os.listdir(input_dir):
-        subfolder_path = os.path.join(input_dir, subfolder)
-        if os.path.isdir(subfolder_path):
-            for image_name in os.listdir(subfolder_path):
-                image_paths.append(os.path.join(subfolder_path, image_name))
+    # Collect all image paths for progress tracking
+    image_paths = [
+        os.path.join(subfolder_path, image_name)
+        for subfolder in os.listdir(input_dir)
+        if os.path.isdir(subfolder_path := os.path.join(input_dir, subfolder))
+        for image_name in os.listdir(subfolder_path)
+    ]
 
-    # Iterate through each image with a progress bar
-    for image_path in tqdm(image_paths, desc="Processing Images", unit="image"):
+    # Process images
+    for image_path in tqdm(image_paths, desc=f"Processing {'Training' if for_training else 'Testing'} Images", unit="image"):
         try:
             image = Image.open(image_path).convert("RGB")
-            # Convert to numpy array and normalize
-            image_array = np.array(image) / 255.0
-            # Compute sum of pixels across height and width
+            image_array = np.array(image) / 255.0  # Normalize to [0,1]
             pixel_sum += np.sum(image_array, axis=(0, 1))
             pixel_squared_sum += np.sum(np.square(image_array), axis=(0, 1))
             num_pixels += image_array.shape[0] * image_array.shape[1]
         except Exception as e:
             print(f"Error processing image {image_path}: {e}")
     
-    # Compute mean and standard deviation
+    # Compute mean and std
     mean = pixel_sum / num_pixels
     std = np.sqrt((pixel_squared_sum / num_pixels) - np.square(mean))
 
-    print(f"Mean: {mean}, Standard Deviation: {std}")
+    # Save computed values
+    with open(save_path, "w") as f:
+        json.dump({"mean": mean.tolist(), "std": std.tolist()}, f)
 
+    print(f"Computed and saved mean and std for {'training' if for_training else 'testing'} data: {mean}, {std}")
     return mean, std
+
 
 def create_train_test_transformers(mean, std, random_rotation_degrees, random_affine_degrees, random_translation, brightness, contrast, saturation, hue):
     """ Create the train and test transformers.
