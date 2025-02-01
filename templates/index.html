@@ -3,23 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
     <title>Image Classification</title>
 </head>
-<body>
-    <h1>Image Classification</h1>
-    <form action="/predict" method="POST" enctype="multipart/form-data">
-        <label for="file">Upload an image:</label><br>
-        <input type="file" name="file" id="file" required><br><br>
-        <button type="submit">Submit</button>
-    </form>
-
-    {% if predictions %}
-    <h2>Predictions:</h2>
-    <ul>
-        {% for label, prob in predictions %}
-        <li>{{ label }}: {{ prob * 100 }}%</li>
-        {% endfor %}
-    </ul>
-    {% endif %}
+<body class="flex items-center justify-center min-h-screen bg-gray-100">
+    <div class="bg-white shadow-lg rounded-lg p-8 max-w-md w-full text-center">
+        <h1 class="text-2xl font-bold text-gray-700">Image Classification</h1>
+        <form action="/predict" method="POST" enctype="multipart/form-data" class="mt-4 space-y-4">
+            <label for="file" class="block text-gray-600 font-medium">Upload an image:</label>
+            <input type="file" name="file" id="file" required class="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+            <button type="submit" class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition">Submit</button>
+        </form>
+        
+        {% if predictions %}
+        <div class="mt-6">
+            <h2 class="text-xl font-semibold text-gray-700">Predictions:</h2>
+            <ul class="mt-4 space-y-2">
+                {% for label, prob in predictions %}
+                <li class="bg-gray-50 p-3 rounded-md shadow-sm text-gray-700">
+                    <span class="font-semibold">{{ label }}</span>: {{ prob * 100 | round(2) }}%
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
 </body>
 </html>
