@@ -70,7 +70,7 @@ def compute_mean_std(input_dir, save_path="mean_std.json", for_training=True, fo
     return mean, std
 
 
-def create_train_test_transformers(mean, std, random_rotation_degrees, random_affine_degrees, random_translation, brightness, contrast, saturation, hue):
+def create_train_test_transformers(mean, std, height, width, random_rotation_degrees, random_affine_degrees, random_translation, brightness, contrast, saturation, hue):
     """ Create the train and test transformers.
 
     Args:
@@ -90,7 +90,7 @@ def create_train_test_transformers(mean, std, random_rotation_degrees, random_af
             - test_transform (torchvision.transforms.Compose): The transformation pipeline for test images.
     """
     train_transform = v2.Compose([
-        v2.Resize((224, 224)),
+        v2.Resize((height, width)),
         v2.RandomHorizontalFlip(),
         v2.RandomVerticalFlip(),
         v2.RandomRotation(random_rotation_degrees),
@@ -109,7 +109,7 @@ def create_train_test_transformers(mean, std, random_rotation_degrees, random_af
     ])
 
     test_transform = v2.Compose([
-        v2.Resize((224, 224)),
+        v2.Resize((height, width)),
         v2.ToTensor(),
         v2.Normalize(mean=mean, std=std)
     ])

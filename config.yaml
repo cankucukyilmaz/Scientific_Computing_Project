@@ -6,6 +6,8 @@ train_dir: "split_data/train"
 test_dir: "split_data/test"
 
 # Transformer
+height: 224
+width: 224
 random_rotation_degrees: 40
 random_affine_degrees: 20
 random_translation: [0.1, 0.1]

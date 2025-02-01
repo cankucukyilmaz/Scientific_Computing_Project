@@ -12,6 +12,8 @@ def preprocess():
     train_transform, test_transform = create_train_test_transformers(
         mean,
         std,
+        config["height"],
+        config["width"],
         config["random_rotation_degrees"],
         config["random_affine_degrees"],
         config["random_translation"],
