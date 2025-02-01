@@ -8,7 +8,7 @@ config = load_config("config.yaml")
 
 def preprocess():
     split_data(config["input_dir"], config["output_dir"], config["train_ratio"])
-    mean, std = compute_mean_std(config["train_dir"])
+    mean, std = compute_mean_std(config["train_dir"], for_training=True)
     train_transform, test_transform = create_train_test_transformers(
         mean,
         std,
