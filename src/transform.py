@@ -141,3 +141,18 @@ def create_data_loaders(data_dir, batch_size, train_transform, test_transform, o
         pickle.dump(test_loader, f)
 
     print(f"Data loaders saved to {output_dir}")
+
+def subset_mean_std(dataset):
+    loader = DataLoader(dataset, batch_size=64, shuffle=False, num_workers=2)
+    mean = torch.zeros(3)
+    std = torch.zeros(3)
+    
+    for images, _ in loader:
+        for i in range(3):  # Assuming RGB images
+            mean[i] += images[:, i, :, :].mean()
+            std[i] += images[:, i, :, :].std()
+    
+    mean /= len(loader)
+    std /= len(loader)
+    
+    return mean, std
