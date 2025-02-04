@@ -6,7 +6,7 @@ from PIL import Image
 from torchvision.transforms import v2
 import torch
 from torchvision.datasets import ImageFolder
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset
 import pickle
 
 def compute_mean_std(input_dir, save_path="mean_std.json", for_training=True, force_recompute=False):
@@ -142,17 +142,45 @@ def create_data_loaders(data_dir, batch_size, train_transform, test_transform, o
 
     print(f"Data loaders saved to {output_dir}")
 
-def subset_mean_std(dataset):
-    loader = DataLoader(dataset, batch_size=64, shuffle=False, num_workers=2)
-    mean = torch.zeros(3)
-    std = torch.zeros(3)
-    
+def mean_std(dataset):
+    loader = DataLoader(dataset, batch_size=32, shuffle=False, num_workers=4)
+    mean = 0.0
+    std = 0.0
+    n_samples = 0
+
     for images, _ in loader:
-        for i in range(3):  # Assuming RGB images
-            mean[i] += images[:, i, :, :].mean()
-            std[i] += images[:, i, :, :].std()
+        batch_samples = images.size(0)
+        images = images.view(batch_samples, images.size(1), -1)
+        mean += images.mean(2).sum(0)
+        std += images.std(2).sum(0)
+        n_samples += batch_samples
     
-    mean /= len(loader)
-    std /= len(loader)
-    
+    mean /= n_samples
+    std /= n_samples
+
     return mean, std
+
+class CustomImageDataset(Dataset):
+    def __init__(self, img_dir, transform=None):
+        self.img_dir = img_dir
+        self.transform = transform
+        self.img_labels = []
+        self.img_paths = []
+
+        # Assuming img_dir contains subfolders for each class
+        for label, class_name in enumerate(os.listdir(img_dir)):
+            class_dir = os.path.join(img_dir, class_name)
+            for img_name in os.listdir(class_dir):
+                self.img_paths.append(os.path.join(class_dir, img_name))
+                self.img_labels.append(label)
+
+    def __len__(self):
+        return len(self.img_labels)
+
+    def __getitem__(self, idx):
+        img_path = self.img_paths[idx]
+        image = Image.open(img_path).convert('RGB')
+        label = self.img_labels[idx]
+        if self.transform:
+            image = self.transform(image)
+        return image, label
