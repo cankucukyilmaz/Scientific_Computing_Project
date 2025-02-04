@@ -25,5 +25,8 @@ test_loader_dir: "loaders/test_loader.pkl"
 epochs: 5
 learning_rate: 0.001
 
+# Hyperparameter Tuning
+n_trials: 100
+
 # Main
 model_path: "model/model.pth"
